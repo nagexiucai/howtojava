@@ -1,7 +1,9 @@
 package core;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -21,19 +23,20 @@ public class AdjointThread extends Thread {
 	public void run() {
 		try {
 			if (this.stream instanceof InputStream) {
-				int b = 0;
-				StringBuffer sb = new StringBuffer();
-				while (this.bibi && ((b = ((InputStream) this.stream).read()) != Constants.EOF)) {
+				InputStreamReader isr = new InputStreamReader((InputStream) this.stream, Constants.ENCODING);
+				BufferedReader br = new BufferedReader(isr);
+				String s = null;
+				while (this.bibi) {
 					System.out.println(this.getName());
-					sb.append((char)b);
-					if (b == Constants.NL) {
-						try {
-							queue.put(sb.toString());
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-							continue;
-						}
-						sb.setLength(0);
+					s = br.readLine();
+					if (s == null) {
+						System.out.println(this.getName() + " quit");
+						break;
+					}
+					try {
+						queue.put(s);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 			}
@@ -46,6 +49,10 @@ public class AdjointThread extends Thread {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						continue;
+					}
+					if (Constants.QUIT.equals(s)) {
+						System.out.println(this.getName() + " quit");
+						break;
 					}
 					((OutputStream) this.stream).write(s.getBytes());
 				}
