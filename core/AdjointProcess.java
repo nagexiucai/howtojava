@@ -17,21 +17,18 @@ public class AdjointProcess {
 			InputStream ins = p.getInputStream();
 			OutputStream outs = p.getOutputStream();
 			InputStream errors = p.getErrorStream();
-			AdjointThread atin = new AdjointThread(ins, in);
-			AdjointThread atout = new AdjointThread(outs, out);
-			AdjointThread aterror = new AdjointThread(errors, error);
+			AdjointThread atin = new AdjointThread(ins, in, "in");
+			AdjointThread atout = new AdjointThread(outs, out, "out");
+			AdjointThread aterror = new AdjointThread(errors, error, "error");
 			atin.start();
+			atin.join(Constants.JOIN);
 			atout.start();
+			atout.join(Constants.JOIN);
 			aterror.start();
-			try {
-				p.wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			ins.close();
-			outs.close();
-			errors.close();
+			aterror.join(Constants.JOIN);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}

@@ -11,7 +11,8 @@ public class AdjointThread extends Thread {
 	private Object stream = null;
 	private LinkedBlockingQueue<String> queue = null;
 
-	public AdjointThread(Object stream, LinkedBlockingQueue<String> queue) {
+	public AdjointThread(Object stream, LinkedBlockingQueue<String> queue, String name) {
+		super(name);
 		this.stream = stream;
 		this.queue = queue;
 	}
@@ -23,6 +24,7 @@ public class AdjointThread extends Thread {
 				int b = 0;
 				StringBuffer sb = new StringBuffer();
 				while (this.bibi && ((b = ((InputStream) this.stream).read()) != Constants.EOF)) {
+					System.out.println(this.getName());
 					sb.append((char)b);
 					if (b == Constants.NL) {
 						try {
@@ -38,6 +40,7 @@ public class AdjointThread extends Thread {
 			else if (this.stream instanceof OutputStream) {
 				String s = null;
 				while (this.bibi) {
+					System.out.println(this.getName());
 					try {
 						s = this.queue.take();
 					} catch (InterruptedException e) {
@@ -48,10 +51,11 @@ public class AdjointThread extends Thread {
 				}
 			}
 			else {
-				System.out.println("what a shame!");
+				System.out.println("what a shame");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			this.bibi = false;
 		}
 	}
 }
